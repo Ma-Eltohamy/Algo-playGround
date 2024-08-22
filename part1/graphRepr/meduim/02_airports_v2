@@ -1,0 +1,66 @@
+#include <iostream>
+#include <set>
+#include <unordered_map>
+#include <vector>
+
+struct edge {
+  int from{}, to{}, cost{};
+
+  bool operator<(const edge &other) const {
+    if (to == other.to)
+      return cost < other.cost;
+    return to < other.to;
+  }
+
+  edge(int from, int to, int cost) : from(from), to(to), cost(cost) {}
+};
+
+typedef std::vector<edge> GRAPH;
+
+void addFlight(GRAPH &graph, int from, int to, int cost) {
+  graph.push_back(edge(from, to, cost));
+}
+
+void printAdjacencyMatrix(
+    GRAPH &graph,
+    std::unordered_map<int, std::string> &airportNames) { // O(V^2 + E)
+  for (auto &edge : graph) {
+    std::cout << "Flights from " << airportNames[edge.from] << ":\n";
+    std::cout << "\tTo " << airportNames[edge.to] << " with cost " << edge.cost
+              << '\n';
+  }
+}
+
+int getAirportId(std::unordered_map<std::string, int> &airportIds,
+                 std::unordered_map<int, std::string> &airportNames,
+                 std::string &airportName) {
+  if (airportIds.count(airportName))
+    return airportIds[airportName];
+
+  int newAirPortId{(int)airportIds.size() + 1};
+  airportIds[airportName] = newAirPortId;
+  airportNames[newAirPortId] = airportName;
+  return airportIds[airportName];
+}
+
+int main(int argc, char *argv[]) {
+  int nodes, edges;
+  std::cin >> nodes >> edges;
+  GRAPH graph;
+
+  std::string fromAirPort, toAirPort;
+  std::unordered_map<std::string, int> airportIds;
+  std::unordered_map<int, std::string> airportNames;
+
+  int from{}, to{}, cost{};
+  for (int i = 0; i < edges; ++i) {
+    std::cin >> fromAirPort >> toAirPort >> cost;
+    from = getAirportId(airportIds, airportNames, fromAirPort);
+    to = getAirportId(airportIds, airportNames, toAirPort);
+
+    addFlight(graph, from, to, cost);
+  }
+
+  printAdjacencyMatrix(graph, airportNames);
+  return 0;
+}
